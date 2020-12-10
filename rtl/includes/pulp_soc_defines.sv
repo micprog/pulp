@@ -24,7 +24,7 @@
 
 // To use new icache use this define
 `define MP_ICACHE
-//`define SP_ICACHE
+// `define SP_ICACHE
 // `define PRIVATE_ICACHE
 
 // To use The L2 Multibank Feature, please decomment this define
@@ -62,6 +62,7 @@
 `define FEATURE_ICACHE_STAT
 
 
+// `define HIERARCHY_ICACHE_32BIT 
 
 
 `ifdef PULP_FPGA_EMUL
