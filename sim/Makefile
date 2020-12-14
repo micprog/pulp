@@ -2,8 +2,9 @@
 
 mkfile_path := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
+VLIB				?= vlib
+VMAP        ?= vmap
 VOPT 				?= vopt
-
 VSIM        ?= vsim
 VSIM_FLAGS  = -gUSE_SDVT_SPI=0 -gUSE_SDVT_CPI=0 -gBAUDRATE=115200 \
 		-gENABLE_DEV_DPI=0 -gLOAD_L2=JTAG -gUSE_SDVT_I2S=0
@@ -52,7 +53,8 @@ endif
 
 lib:
 ifdef BENDER
-	@true
+	@$(VLIB) work
+	$(VMAP) work $(mkfile_path)/work
 else
 	@make --no-print-directory -f $(mkfile_path)/vcompile/ips.mk lib
 	@make --no-print-directory -f $(mkfile_path)/vcompile/rtl.mk lib

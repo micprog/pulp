@@ -45,7 +45,7 @@ clean:
 	cd sim && $(MAKE) BENDER=$(BENDER) clean
 
 build:
-	cd sim && $(MAKE) all
+	cd sim && $(MAKE) BENDER=$(BENDER) all
 #	cd sim && $(MAKE) lib build opt
 #	mkdir -p $(VSIM_PATH)
 #	cp -r rtl/tb/* $(VSIM_PATH)
