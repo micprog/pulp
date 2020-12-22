@@ -1,6 +1,8 @@
 
 SHELL=bash
 
+PYTHON3 ?= python3
+
 PKG_DIR ?= $(PWD)/pulp-runtime
 
 export VSIM_PATH=$(PWD)/sim
@@ -11,6 +13,9 @@ export MSIM_LIBS_PATH=$(VSIM_PATH)/modelsim_libs
 export IPS_PATH=$(PULP_PATH)/fe/ips
 export RTL_PATH=$(PULP_PATH)/fe/rtl
 export TB_PATH=$(PULP_PATH)/rtl/tb
+
+export AEGIS_ROOT=$(PWD)/aegis
+export AEGIS_FILE_PATH=$(PWD)
 
 define declareInstallFile
 
@@ -149,7 +154,7 @@ test-local-runtime:
 VLOG_ARGS += -suppress 2583 -suppress 13314
 BENDER_BUILD_DIR = sim
 
-.PHONY: bender-script bender-build bender-rm
+.PHONY: bender-script bender-build bender-rm aegis-rm aegis-scripts aegis-clean aegis-run
 bender-script: 
 	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_BUILD_DIR)/compile.tcl
 	./bender script vsim \
@@ -166,3 +171,36 @@ endif
 
 bender-rm:
 	rm -f bender
+
+aegis:
+	git clone git@iis-git.ee.ethz.ch:bslk/aegis.git -b 5388a5ff6fa10eeee99fca0c71991ef6a833fa2c
+
+aegis-rm:
+	rm -rf aegis
+
+aegis-scripts:
+ifndef BENDER
+	$(error This functionality is currently only supported for bender, please use this build method.)
+else
+	mkdir -p scripts
+	./bender script synopsys | cat > scripts/analyze.tcl
+	./bender script flist | cat > scripts/flist.txt
+	./bender script vivado | cat > scripts/analyze_vivado.tcl
+	./bender sources -f | cat > scripts/sources.json
+endif
+
+aegis-clean:
+	rm -f scripts/analyze.tcl
+	rm -f scripts/flist.txt
+	rm -f scripts/analyze_vivado.tcl
+
+aegis-run: 
+	$(MAKE) -C aegis/freepdk45/synopsys clean
+	$(MAKE) -C aegis/freepdk45/synopsys synth_pulp_cluster.ri5cy
+	$(MAKE) -C aegis/freepdk45/synopsys synth_pulp_cluster.ibex
+	$(MAKE) -C aegis/freepdk45/synopsys synth_pulp_cluster.ibex_ecc
+	$(MAKE) -C aegis/freepdk45/synopsys synth_pulp_cluster.ibex_ecc2
+
+aegis-publish:
+	rm -f $(AEGIS_ROOT)/frontend/data.json
+	$(MAKE) -C aegis/frontend data.json gtable_pulp_cluster
